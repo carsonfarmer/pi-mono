@@ -429,99 +429,99 @@ export class ACPAgent implements ACPAgentInterface {
 	}
 
 	private async handleSessionEvent(state: ACPSessionState, event: AgentSessionEvent): Promise<void> {
-		if (event.type === "message_start" && event.message.role === "assistant") {
-			state.assistantDeltaSeen = false;
-			return;
-		}
-
-		if (event.type === "message_update") {
-			if (event.assistantMessageEvent.type === "text_delta") {
-				state.assistantDeltaSeen = true;
-				await this.connection.sessionUpdate({
-					sessionId: state.session.sessionId,
-					update: {
-						sessionUpdate: "agent_message_chunk",
-						content: { type: "text", text: event.assistantMessageEvent.delta },
-					},
-				});
-			}
-			if (event.assistantMessageEvent.type === "thinking_delta") {
-				state.assistantDeltaSeen = true;
-				await this.connection.sessionUpdate({
-					sessionId: state.session.sessionId,
-					update: {
-						sessionUpdate: "agent_thought_chunk",
-						content: { type: "text", text: event.assistantMessageEvent.delta },
-					},
-				});
-			}
-			return;
-		}
-
-		if (event.type === "message_end") {
-			if (event.message.role === "assistant" && !state.assistantDeltaSeen) {
-				const updates = mapMessageToSessionUpdates(event.message);
-				for (const update of updates) {
-					await this.connection.sessionUpdate({ sessionId: state.session.sessionId, update });
+		switch (event.type) {
+			case "message_start":
+				if (event.message.role === "assistant") {
+					state.assistantDeltaSeen = false;
 				}
+				return;
+			case "message_update":
+				if (event.assistantMessageEvent.type === "text_delta") {
+					state.assistantDeltaSeen = true;
+					await this.connection.sessionUpdate({
+						sessionId: state.session.sessionId,
+						update: {
+							sessionUpdate: "agent_message_chunk",
+							content: { type: "text", text: event.assistantMessageEvent.delta },
+						},
+					});
+					return;
+				}
+				if (event.assistantMessageEvent.type === "thinking_delta") {
+					state.assistantDeltaSeen = true;
+					await this.connection.sessionUpdate({
+						sessionId: state.session.sessionId,
+						update: {
+							sessionUpdate: "agent_thought_chunk",
+							content: { type: "text", text: event.assistantMessageEvent.delta },
+						},
+					});
+				}
+				return;
+			case "message_end":
+				if (event.message.role === "assistant" && !state.assistantDeltaSeen) {
+					const updates = mapMessageToSessionUpdates(event.message);
+					for (const update of updates) {
+						await this.connection.sessionUpdate({ sessionId: state.session.sessionId, update });
+					}
+				}
+				return;
+			case "tool_execution_start": {
+				this.toolCallInputs.set(event.toolCallId, { toolName: event.toolName, args: event.args ?? {} });
+				const toolCall: ToolCall = {
+					toolCallId: event.toolCallId,
+					title: formatToolTitle(event.toolName, event.args ?? {}),
+					kind: mapToolKind(event.toolName),
+					status: "pending",
+					rawInput: event.args,
+					locations: mapToolLocations(event.toolName, event.args),
+				};
+				await this.connection.sessionUpdate({
+					sessionId: state.session.sessionId,
+					update: { sessionUpdate: "tool_call", ...toolCall },
+				});
+				return;
 			}
-			return;
-		}
-
-		if (event.type === "tool_execution_start") {
-			this.toolCallInputs.set(event.toolCallId, { toolName: event.toolName, args: event.args ?? {} });
-			const toolCall: ToolCall = {
-				toolCallId: event.toolCallId,
-				title: formatToolTitle(event.toolName, event.args ?? {}),
-				kind: mapToolKind(event.toolName),
-				status: "pending",
-				rawInput: event.args,
-				locations: mapToolLocations(event.toolName, event.args),
-			};
-			await this.connection.sessionUpdate({
-				sessionId: state.session.sessionId,
-				update: { sessionUpdate: "tool_call", ...toolCall },
-			});
-			return;
-		}
-
-		if (event.type === "tool_execution_update") {
-			const update: ToolCallUpdate = {
-				toolCallId: event.toolCallId,
-				status: "in_progress",
-				title: formatToolTitle(event.toolName, event.args ?? {}),
-				kind: mapToolKind(event.toolName),
-				locations: mapToolLocations(event.toolName, event.args ?? {}),
-				rawInput: event.args,
-				content: toToolCallContent(event.partialResult?.content),
-			};
-			await this.connection.sessionUpdate({
-				sessionId: state.session.sessionId,
-				update: { sessionUpdate: "tool_call_update", ...update },
-			});
-			return;
-		}
-
-		if (event.type === "tool_execution_end") {
-			const inputs = this.toolCallInputs.get(event.toolCallId);
-			const status = event.isError ? "failed" : "completed";
-			const content = toToolCallContent(event.result?.content);
-			const diff = inputs ? toToolDiffContent(inputs.toolName, inputs.args) : undefined;
-			const update: ToolCallUpdate = {
-				toolCallId: event.toolCallId,
-				status,
-				title: formatToolTitle(event.toolName, inputs?.args ?? {}),
-				kind: mapToolKind(event.toolName),
-				locations: mapToolLocations(event.toolName, inputs?.args ?? {}),
-				rawInput: inputs?.args,
-				content: diff ? [...(content ?? []), diff] : content,
-				rawOutput: event.result,
-			};
-			await this.connection.sessionUpdate({
-				sessionId: state.session.sessionId,
-				update: { sessionUpdate: "tool_call_update", ...update },
-			});
-			this.toolCallInputs.delete(event.toolCallId);
+			case "tool_execution_update": {
+				const update: ToolCallUpdate = {
+					toolCallId: event.toolCallId,
+					status: "in_progress",
+					title: formatToolTitle(event.toolName, event.args ?? {}),
+					kind: mapToolKind(event.toolName),
+					locations: mapToolLocations(event.toolName, event.args ?? {}),
+					rawInput: event.args,
+					content: toToolCallContent(event.partialResult?.content),
+				};
+				await this.connection.sessionUpdate({
+					sessionId: state.session.sessionId,
+					update: { sessionUpdate: "tool_call_update", ...update },
+				});
+				return;
+			}
+			case "tool_execution_end": {
+				const inputs = this.toolCallInputs.get(event.toolCallId);
+				const status = event.isError ? "failed" : "completed";
+				const content = toToolCallContent(event.result?.content);
+				const diff = inputs ? toToolDiffContent(inputs.toolName, inputs.args) : undefined;
+				const update: ToolCallUpdate = {
+					toolCallId: event.toolCallId,
+					status,
+					title: formatToolTitle(event.toolName, inputs?.args ?? {}),
+					kind: mapToolKind(event.toolName),
+					locations: mapToolLocations(event.toolName, inputs?.args ?? {}),
+					rawInput: inputs?.args,
+					content: diff ? [...(content ?? []), diff] : content,
+					rawOutput: event.result,
+				};
+				await this.connection.sessionUpdate({
+					sessionId: state.session.sessionId,
+					update: { sessionUpdate: "tool_call_update", ...update },
+				});
+				this.toolCallInputs.delete(event.toolCallId);
+				return;
+			}
+			default:
+				return;
 		}
 	}
 }
@@ -650,48 +650,23 @@ function mapToolKind(toolName: string): ToolKind {
 	}
 }
 
+const TOOLS_WITH_PATH = new Set(["read", "edit", "write", "grep", "find", "ls"]);
+
 function mapToolLocations(toolName: string, args: Record<string, unknown>): Array<{ path: string }> | undefined {
 	const path = typeof args.path === "string" ? args.path : undefined;
 	if (!path) return undefined;
-	switch (toolName.toLowerCase()) {
-		case "read":
-		case "edit":
-		case "write":
-		case "grep":
-		case "find":
-		case "ls":
-			return [{ path }];
-		default:
-			return undefined;
-	}
+	const name = toolName.toLowerCase();
+	return TOOLS_WITH_PATH.has(name) ? [{ path }] : undefined;
 }
 
 function formatToolTitle(toolName: string, args: Record<string, unknown>): string {
-	const normalized = toolName.toLowerCase();
-	if (normalized === "bash") {
+	const name = toolName.toLowerCase();
+	if (name === "bash") {
 		const command = typeof args.command === "string" ? args.command : undefined;
 		return command ?? toolName;
 	}
 	const path = typeof args.path === "string" ? args.path : undefined;
-	if (!path) {
-		return toolName;
-	}
-	switch (normalized) {
-		case "read":
-			return `read ${path}`;
-		case "write":
-			return `write ${path}`;
-		case "edit":
-			return `edit ${path}`;
-		case "ls":
-			return `ls ${path}`;
-		case "grep":
-			return `grep ${path}`;
-		case "find":
-			return `find ${path}`;
-		default:
-			return toolName;
-	}
+	return path ? `${toolName} ${path}` : toolName;
 }
 
 function getLastAssistantMessage(messages: AgentMessage[]) {

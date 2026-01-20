@@ -38,23 +38,12 @@ export async function startAcpServer(options: ACPServerOptions = {}): Promise<vo
 
 	const stdoutWrite = process.stdout.write.bind(process.stdout);
 	const stderrWrite = process.stderr.write.bind(process.stderr);
-	let isAcpWrite = false;
-	process.stdout.write = ((
-		chunk: string | Uint8Array,
-		encoding?: BufferEncoding,
-		cb?: (err?: Error | null) => void,
-	) => {
-		if (isAcpWrite) {
-			return stdoutWrite(chunk, encoding as BufferEncoding, cb);
-		}
-		return stderrWrite(chunk, encoding as BufferEncoding, cb);
-	}) as typeof process.stdout.write;
+	process.stdout.write = ((chunk: string | Uint8Array, encoding?: BufferEncoding, cb?: (err?: Error | null) => void) =>
+		stderrWrite(chunk, encoding, cb)) as typeof process.stdout.write;
 
 	const acpOutput = new Writable({
 		write(chunk, _encoding, callback) {
-			isAcpWrite = true;
 			stdoutWrite(chunk);
-			isAcpWrite = false;
 			callback();
 		},
 	});
