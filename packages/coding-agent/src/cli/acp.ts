@@ -31,7 +31,7 @@ export function parseAcpArgs(args: string[]): AcpArgs {
 
 export function printAcpHelp(): void {
 	console.log(
-		`${chalk.bold(APP_NAME)} acp - Agent Client Protocol server\n\n${chalk.bold("Usage:")}\n  ${APP_NAME} acp [options]\n\n${chalk.bold("Options:")}\n  --cwd <path>         Working directory for new sessions\n  --provider <name>    Default provider override\n  --model <id>         Default model override\n  --help, -h           Show this help\n\n${chalk.bold("Examples:")}\n  ${APP_NAME} acp\n  ${APP_NAME} acp --cwd /path/to/project\n  ${APP_NAME} acp --provider anthropic --model claude-sonnet-4-5\n`,
+		`${chalk.bold(APP_NAME)} --acp - Agent Client Protocol server\n\n${chalk.bold("Usage:")}\n  ${APP_NAME} --acp [options]\n\n${chalk.bold("Options:")}\n  --cwd <path>         Working directory for new sessions\n  --provider <name>    Default provider override\n  --model <id>         Default model override\n  --help, -h           Show this help\n\n${chalk.bold("Examples:")}\n  ${APP_NAME} --acp\n  ${APP_NAME} --acp --cwd /path/to/project\n  ${APP_NAME} --acp --provider anthropic --model claude-sonnet-4-5\n`,
 	);
 }
 

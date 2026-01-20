@@ -12,7 +12,7 @@ This document describes the ACP surface pi implements, the session lifecycle, ev
 ## Starting ACP Mode
 
 ```bash
-pi acp --cwd /path/to/project --provider anthropic --model claude-sonnet-4-5
+pi --acp --cwd /path/to/project --provider anthropic --model claude-sonnet-4-5
 ```
 
 Notes:
@@ -184,6 +184,6 @@ process.stderr.write("\nDone\n");
 
 ## Troubleshooting
 
-- **JSON parsing errors**: verify the server is running in ACP mode (`pi acp`) and not interactive TUI mode.
+- **JSON parsing errors**: verify the server is running in ACP mode (`pi --acp`) and not interactive TUI mode.
 - **Model not found**: ensure the `provider/model` identifier exists and credentials are configured.
 - **Session not found**: use `unstable_listSessions` to confirm available session IDs.

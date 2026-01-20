@@ -1373,8 +1373,8 @@ Send JSON commands on stdin:
 For ACP-compatible editors (Zed, JetBrains, CodeCompanion), run the ACP server over stdio:
 
 ```bash
-pi acp
-pi acp --cwd /path/to/project
+pi --acp
+pi --acp --cwd /path/to/project
 ```
 
 The server uses pi's native `AgentSession`, tools, and streaming semantics without spawning a subprocess. For manual testing, see [docs/acp.md](docs/acp.md).

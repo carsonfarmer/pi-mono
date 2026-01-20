@@ -12,9 +12,9 @@ This module implements ACP server support for pi using the official `@agentclien
 ## Usage
 
 ```bash
-pi acp
-pi acp --cwd /path/to/project
-pi acp --provider anthropic --model claude-sonnet-4-5
+pi --acp
+pi --acp --cwd /path/to/project
+pi --acp --provider anthropic --model claude-sonnet-4-5
 ```
 
 ## Testing

@@ -315,8 +315,9 @@ function buildSessionOptions(
 export async function main(args: string[]) {
 	time("start");
 
-	if (args[0] === "acp") {
-		await runAcp(args.slice(1));
+	if (args.includes("--acp")) {
+		const acpArgs = args.filter((arg) => arg !== "--acp");
+		await runAcp(acpArgs);
 		return;
 	}
 
