@@ -1,5 +1,7 @@
 // Core session management
 
+// ACP server
+export { startAcpServer } from "./acp/server.js";
 // Config paths
 export { getAgentDir } from "./config.js";
 export {

@@ -161,6 +161,7 @@ export function printHelp(): void {
 
 ${chalk.bold("Usage:")}
   ${APP_NAME} [options] [@files...] [messages...]
+  ${APP_NAME} acp [options]
 
 ${chalk.bold("Options:")}
   --provider <name>              Provider name (default: google)
@@ -195,6 +196,9 @@ Extensions can register additional flags (e.g., --plan from plan-mode extension)
 ${chalk.bold("Examples:")}
   # Interactive mode
   ${APP_NAME}
+
+  # ACP server (stdio)
+  ${APP_NAME} acp
 
   # Interactive mode with initial prompt
   ${APP_NAME} "List all .ts files in src/"
