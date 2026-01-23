@@ -192,13 +192,15 @@ export class ACPAgent implements ACPAgentInterface {
 
 	async prompt(params: PromptRequest): Promise<PromptResponse> {
 		const state = this.sessionManager.get(params.sessionId);
-		if (state.session.isStreaming) {
-			throw RequestError.invalidParams({ error: "Session is busy" });
-		}
-
 		const { text, images } = promptToPi(params.prompt);
 		state.assistantDeltaSeen = false;
-		await state.session.prompt(text, { images });
+
+		if (state.session.isStreaming) {
+			await state.session.prompt(text, { images, streamingBehavior: "followUp" });
+			await this.waitForIdle(state.session);
+		} else {
+			await state.session.prompt(text, { images });
+		}
 
 		const lastAssistant = getLastAssistantMessage(state.session.messages);
 		if (lastAssistant && !state.assistantDeltaSeen) {
@@ -428,6 +430,12 @@ export class ACPAgent implements ACPAgentInterface {
 			for (const update of updates) {
 				await this.connection.sessionUpdate({ sessionId: state.session.sessionId, update });
 			}
+		}
+	}
+
+	private async waitForIdle(session: ACPSessionState["session"]): Promise<void> {
+		while (session.isStreaming) {
+			await new Promise<void>((resolve) => setTimeout(resolve, 25));
 		}
 	}
 
