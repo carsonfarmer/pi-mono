@@ -49,7 +49,6 @@ const STOP_REASON_MAP: Record<string, PromptResponse["stopReason"]> = {
 	toolUse: "end_turn",
 	length: "max_tokens",
 	aborted: "cancelled",
-	error: "refusal",
 };
 
 const CONFIG_OPTION_IDS = {
@@ -208,6 +207,10 @@ export class ACPAgent implements ACPAgentInterface {
 				await this.connection.sessionUpdate({ sessionId: state.session.sessionId, update });
 			}
 			state.assistantDeltaSeen = updates.length > 0;
+		}
+
+		if (lastAssistant?.stopReason === "error") {
+			throw RequestError.internalError({ error: lastAssistant.errorMessage ?? "Model error" });
 		}
 
 		const stopReason = lastAssistant?.stopReason ? STOP_REASON_MAP[lastAssistant.stopReason] : "end_turn";
