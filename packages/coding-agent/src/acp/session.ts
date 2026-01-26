@@ -1,4 +1,4 @@
-import { type McpServer, RequestError } from "@agentclientprotocol/sdk";
+import { RequestError } from "@agentclientprotocol/sdk";
 import type { Model } from "@mariozechner/pi-ai";
 import { createEventBus } from "../core/event-bus.js";
 import { createAgentSession } from "../core/sdk.js";
@@ -18,7 +18,7 @@ export class ACPSessionManager {
 		this.defaultModel = defaultModel;
 	}
 
-	async create(cwd: string, mcpServers: McpServer[]): Promise<ACPSessionState> {
+	async create(cwd: string): Promise<ACPSessionState> {
 		const sessionManager = SessionManager.create(cwd, this.config.sessionDir);
 		const settingsManager = SettingsManager.create(cwd, this.config.agentDir);
 		const eventBus = createEventBus();
@@ -36,7 +36,6 @@ export class ACPSessionManager {
 			session,
 			sessionManager,
 			cwd,
-			mcpServers,
 			createdAt: new Date(),
 			assistantDeltaSeen: false,
 			modeId: DEFAULT_MODE_ID,
@@ -46,7 +45,7 @@ export class ACPSessionManager {
 		return state;
 	}
 
-	async load(sessionId: string, cwd: string, mcpServers: McpServer[]): Promise<ACPSessionState> {
+	async load(sessionId: string, cwd: string): Promise<ACPSessionState> {
 		const sessionPath = await this.findSessionPath(sessionId, cwd);
 		if (!sessionPath) {
 			throw RequestError.resourceNotFound(sessionId);
@@ -68,7 +67,6 @@ export class ACPSessionManager {
 			session,
 			sessionManager,
 			cwd,
-			mcpServers,
 			createdAt: new Date(),
 			assistantDeltaSeen: false,
 			modeId: DEFAULT_MODE_ID,
@@ -78,11 +76,11 @@ export class ACPSessionManager {
 		return state;
 	}
 
-	async resume(sessionId: string, cwd: string, mcpServers: McpServer[]): Promise<ACPSessionState> {
-		return this.load(sessionId, cwd, mcpServers);
+	async resume(sessionId: string, cwd: string): Promise<ACPSessionState> {
+		return this.load(sessionId, cwd);
 	}
 
-	async fork(sessionId: string, cwd: string, mcpServers: McpServer[]): Promise<ACPSessionState> {
+	async fork(sessionId: string, cwd: string): Promise<ACPSessionState> {
 		const sessionPath = await this.findSessionPath(sessionId, cwd);
 		if (!sessionPath) {
 			throw RequestError.resourceNotFound(sessionId);
@@ -104,7 +102,6 @@ export class ACPSessionManager {
 			session,
 			sessionManager,
 			cwd,
-			mcpServers,
 			createdAt: new Date(),
 			assistantDeltaSeen: false,
 			modeId: DEFAULT_MODE_ID,

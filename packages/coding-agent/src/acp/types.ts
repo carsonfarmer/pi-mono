@@ -1,4 +1,3 @@
-import type { McpServer } from "@agentclientprotocol/sdk";
 import type { AgentSession } from "../core/agent-session.js";
 import type { AuthStorage } from "../core/auth-storage.js";
 import type { ModelRegistry } from "../core/model-registry.js";
@@ -37,7 +36,6 @@ export interface ACPSessionState {
 	session: ACPAgentSession;
 	sessionManager: SessionManager;
 	cwd: string;
-	mcpServers: McpServer[];
 	createdAt: Date;
 	modeId: ACPModeId;
 	unsubscribe?: () => void;
@@ -45,10 +43,10 @@ export interface ACPSessionState {
 }
 
 export interface ACPSessionManagerApi {
-	create(cwd: string, mcpServers: McpServer[]): Promise<ACPSessionState>;
-	load(sessionId: string, cwd: string, mcpServers: McpServer[]): Promise<ACPSessionState>;
-	resume(sessionId: string, cwd: string, mcpServers: McpServer[]): Promise<ACPSessionState>;
-	fork(sessionId: string, cwd: string, mcpServers: McpServer[]): Promise<ACPSessionState>;
+	create(cwd: string): Promise<ACPSessionState>;
+	load(sessionId: string, cwd: string): Promise<ACPSessionState>;
+	resume(sessionId: string, cwd: string): Promise<ACPSessionState>;
+	fork(sessionId: string, cwd: string): Promise<ACPSessionState>;
 	list(cwd?: string): Promise<SessionInfo[]>;
 	get(sessionId: string): ACPSessionState;
 }

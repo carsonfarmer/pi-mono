@@ -111,7 +111,7 @@ export class ACPAgent implements ACPAgentInterface {
 
 	async newSession(params: NewSessionRequest): Promise<NewSessionResponse> {
 		const cwd = this.resolveCwd(params.cwd);
-		const state = await this.sessionManager.create(cwd, params.mcpServers);
+		const state = await this.sessionManager.create(cwd);
 		this.setupSessionSubscriptions(state);
 		const response = await this.buildSessionResponse(state);
 		return { sessionId: state.session.sessionId, ...response };
@@ -119,7 +119,7 @@ export class ACPAgent implements ACPAgentInterface {
 
 	async loadSession(params: LoadSessionRequest): Promise<LoadSessionResponse> {
 		const cwd = this.resolveCwd(params.cwd);
-		const state = await this.sessionManager.load(params.sessionId, cwd, params.mcpServers);
+		const state = await this.sessionManager.load(params.sessionId, cwd);
 		this.setupSessionSubscriptions(state);
 		await this.replayHistory(state);
 		return this.buildSessionResponse(state);
@@ -127,14 +127,14 @@ export class ACPAgent implements ACPAgentInterface {
 
 	async unstable_resumeSession(params: ResumeSessionRequest): Promise<ResumeSessionResponse> {
 		const cwd = this.resolveCwd(params.cwd);
-		const state = await this.sessionManager.resume(params.sessionId, cwd, params.mcpServers ?? []);
+		const state = await this.sessionManager.resume(params.sessionId, cwd);
 		this.setupSessionSubscriptions(state);
 		return this.buildSessionResponse(state);
 	}
 
 	async unstable_forkSession(params: ForkSessionRequest): Promise<ForkSessionResponse> {
 		const cwd = this.resolveCwd(params.cwd);
-		const state = await this.sessionManager.fork(params.sessionId, cwd, params.mcpServers ?? []);
+		const state = await this.sessionManager.fork(params.sessionId, cwd);
 		this.setupSessionSubscriptions(state);
 		await this.replayHistory(state);
 		const response = await this.buildSessionResponse(state);

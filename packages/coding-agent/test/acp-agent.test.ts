@@ -151,38 +151,33 @@ class FakeSessionManager {
 	resumed = false;
 	forked = false;
 	lastCwd?: string;
-	lastMcp?: unknown;
 	listSessions: SessionInfo[] = [];
 
 	constructor(state: ACPSessionState) {
 		this.state = state;
 	}
 
-	async create(cwd: string, mcpServers: unknown[]): Promise<ACPSessionState> {
+	async create(cwd: string): Promise<ACPSessionState> {
 		this.created = true;
 		this.lastCwd = cwd;
-		this.lastMcp = mcpServers;
 		return this.state;
 	}
 
-	async load(_sessionId: string, cwd: string, mcpServers: unknown[]): Promise<ACPSessionState> {
+	async load(_sessionId: string, cwd: string): Promise<ACPSessionState> {
 		this.loaded = true;
 		this.lastCwd = cwd;
-		this.lastMcp = mcpServers;
 		return this.state;
 	}
 
-	async resume(_sessionId: string, cwd: string, mcpServers: unknown[]): Promise<ACPSessionState> {
+	async resume(_sessionId: string, cwd: string): Promise<ACPSessionState> {
 		this.resumed = true;
 		this.lastCwd = cwd;
-		this.lastMcp = mcpServers;
 		return this.state;
 	}
 
-	async fork(_sessionId: string, cwd: string, mcpServers: unknown[]): Promise<ACPSessionState> {
+	async fork(_sessionId: string, cwd: string): Promise<ACPSessionState> {
 		this.forked = true;
 		this.lastCwd = cwd;
-		this.lastMcp = mcpServers;
 		return this.state;
 	}
 
@@ -500,7 +495,6 @@ function buildSessionState(session: FakeAgentSession): ACPSessionState {
 		session,
 		sessionManager: {} as ACPSessionState["sessionManager"],
 		cwd: "/tmp",
-		mcpServers: [],
 		createdAt: new Date(),
 		assistantDeltaSeen: false,
 		modeId: "code",
