@@ -3,7 +3,7 @@ import { APP_NAME, runMigrations, VERSION } from "@mariozechner/pi-coding-agent"
 import chalk from "chalk";
 import { startAcpServer } from "./acp/server.js";
 
-const CLI_NAME = `${APP_NAME}-acp`;
+const CLI_NAME = "acp-pi";
 
 interface AcpArgs {
 	cwd?: string;

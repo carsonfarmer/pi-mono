@@ -4,7 +4,7 @@
 	"description": "ACP server and CLI for the pi coding agent",
 	"type": "module",
 	"bin": {
-		"pi-acp": "dist/cli.js"
+		"acp-pi": "dist/cli.js"
 	},
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",

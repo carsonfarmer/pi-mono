@@ -1,24 +1,24 @@
 # ACP Server
 
-`pi-acp` exposes the pi coding agent over the Agent Client Protocol (ACP) using NDJSON over stdin/stdout. Use this to integrate pi with ACP-compliant clients (editors or custom UIs) without the interactive TUI.
+`acp-pi` exposes the pi coding agent over the Agent Client Protocol (ACP) using NDJSON over stdin/stdout. Use this to integrate pi with ACP-compliant clients (editors or custom UIs) without the interactive TUI.
 
 This document describes the ACP surface pi implements, the session lifecycle, events, and current limitations. For ACP schema details, use the official SDK types and Zod validators from `@agentclientprotocol/sdk`.
 
 ## Prerequisites
 
-- `pi-acp` installed (or runnable via `tsx` in the repo)
+- `@mariozechner/pi-acp` installed (CLI `acp-pi`, or runnable via `tsx` in the repo)
 - A configured model provider (for example `ANTHROPIC_API_KEY` or `ANTHROPIC_OAUTH_TOKEN`)
 
 ## Starting the Server
 
 ```bash
-pi-acp --cwd /path/to/project --provider anthropic --model claude-sonnet-4-5
+acp-pi --provider anthropic --model claude-sonnet-4-5
 ```
 
 Notes:
 - ACP mode is headless and communicates only via stdin/stdout.
 - Any non-ACP output is redirected to stderr.
-- `--cwd` must be an absolute path.
+- `--cwd` is optional. ACP clients should send an absolute `cwd` in `newSession`; otherwise the server defaults to the process working directory.
 - The server uses the same session directory as pi (`~/.pi/agent/sessions/acp`).
 
 ## Protocol Overview
@@ -129,6 +129,27 @@ pi emits ACP session updates through `sessionUpdate` notifications. Key update t
 
 For ACP-compliant clients, use the official SDK to validate schema compliance and handle NDJSON transport.
 
+### Zed
+
+Zed can run `acp-pi` as a custom ACP agent via `settings.json`:
+
+```json
+{
+  "agent_servers": {
+    "Pi CLI": {
+      "type": "custom",
+      "command": "acp-pi",
+      "args": [],
+      "env": {
+        "PROVIDER_API_KEY": "your-key-here"
+      }
+    }
+  }
+}
+```
+
+Open the Agent Panel in Zed and start a new thread for `Pi CLI`.
+
 Minimal initialization flow:
 1. `initialize` with `protocolVersion: 1`
 2. `newSession` (or `loadSession`/`resumeSession`)
@@ -183,8 +204,30 @@ zPromptResponse.parse(response);
 process.stderr.write("\nDone\n");
 ```
 
+### By itself (NDJSON)
+
+Run the server and send raw JSON-RPC over stdin:
+
+```bash
+acp-pi
+```
+
+Paste this into the terminal and press Enter:
+
+```json
+{"jsonrpc":"2.0","id":0,"method":"initialize","params":{"protocolVersion":1}}
+```
+
+You should see a response like:
+
+```json
+{"jsonrpc":"2.0","id":0,"result":{"protocolVersion":1,"agentCapabilities":{"loadSession":true,"promptCapabilities":{"embeddedContext":true,"image":true},"sessionCapabilities":{"list":{},"resume":{},"fork":{}}},"agentInfo":{"name":"pi","version":"0.48.0"}}}
+```
+
+From there, send `newSession` and `prompt` requests with the returned `sessionId`.
+
 ## Troubleshooting
 
-- **JSON parsing errors**: verify the server is running in ACP mode (`pi-acp`) and not interactive TUI mode.
+- **JSON parsing errors**: verify the server is running in ACP mode (`acp-pi`) and not interactive TUI mode.
 - **Model not found**: ensure the `provider/model` identifier exists and credentials are configured.
 - **Session not found**: use `unstable_listSessions` to confirm available session IDs.
