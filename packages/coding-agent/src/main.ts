@@ -10,7 +10,6 @@ import chalk from "chalk";
 import { existsSync } from "fs";
 import { join } from "path";
 import { createInterface } from "readline";
-import { runAcp } from "./cli/acp.js";
 import { type Args, parseArgs, printHelp } from "./cli/args.js";
 import { processFileArguments } from "./cli/file-processor.js";
 import { listModels } from "./cli/list-models.js";
@@ -314,12 +313,6 @@ function buildSessionOptions(
 
 export async function main(args: string[]) {
 	time("start");
-
-	if (args.includes("--acp")) {
-		const acpArgs = args.filter((arg) => arg !== "--acp");
-		await runAcp(acpArgs);
-		return;
-	}
 
 	// Run migrations (pass cwd for project-local migrations)
 	const { migratedAuthProviders: migratedProviders, deprecationWarnings } = runMigrations(process.cwd());

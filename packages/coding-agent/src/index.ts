@@ -1,9 +1,7 @@
 // Core session management
 
-// ACP server
-export { startAcpServer } from "./acp/server.js";
 // Config paths
-export { getAgentDir } from "./config.js";
+export { APP_NAME, CONFIG_DIR_NAME, ENV_AGENT_DIR, getAgentDir, VERSION } from "./config.js";
 export {
 	AgentSession,
 	type AgentSessionConfig,
@@ -227,6 +225,8 @@ export {
 } from "./core/tools/index.js";
 // Main entry point
 export { main } from "./main.js";
+// Migrations
+export { runMigrations } from "./migrations.js";
 // Run modes for programmatic SDK usage
 export {
 	InteractiveMode,

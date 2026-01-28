@@ -4,13 +4,10 @@ import { type ContentBlock, RequestError, type SessionNotification } from "@agen
 import { zSessionNotification } from "@agentclientprotocol/sdk/dist/schema/zod.gen.js";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { AssistantMessage, Model, TextContent } from "@mariozechner/pi-ai";
+import { type AgentSessionEvent, AuthStorage, ModelRegistry, type SessionInfo } from "@mariozechner/pi-coding-agent";
 import { describe, expect, test } from "vitest";
 import { ACPAgent } from "../src/acp/agent.js";
 import type { ACPSessionState } from "../src/acp/types.js";
-import type { AgentSessionEvent } from "../src/core/agent-session.js";
-import { AuthStorage } from "../src/core/auth-storage.js";
-import { ModelRegistry } from "../src/core/model-registry.js";
-import type { SessionInfo } from "../src/core/session-manager.js";
 
 class FakeConnection {
 	updates: SessionNotification[] = [];

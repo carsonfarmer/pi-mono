@@ -1,8 +1,11 @@
-import type { AgentSession } from "../core/agent-session.js";
-import type { AuthStorage } from "../core/auth-storage.js";
-import type { ModelRegistry } from "../core/model-registry.js";
-import type { SessionInfo, SessionManager } from "../core/session-manager.js";
-import type { SettingsManager } from "../core/settings-manager.js";
+import type {
+	AgentSession,
+	AuthStorage,
+	ModelRegistry,
+	SessionInfo,
+	SessionManager,
+	SettingsManager,
+} from "@mariozechner/pi-coding-agent";
 
 export type ACPModeId = "code" | "read-only";
 

@@ -1,24 +1,25 @@
-# ACP Mode
+# ACP Server
 
-ACP mode exposes pi over the Agent Client Protocol (ACP) using NDJSON over stdin/stdout. Use this to integrate pi with ACP-compliant clients (for example, editors or custom UIs) without the interactive TUI.
+`pi-acp` exposes the pi coding agent over the Agent Client Protocol (ACP) using NDJSON over stdin/stdout. Use this to integrate pi with ACP-compliant clients (editors or custom UIs) without the interactive TUI.
 
 This document describes the ACP surface pi implements, the session lifecycle, events, and current limitations. For ACP schema details, use the official SDK types and Zod validators from `@agentclientprotocol/sdk`.
 
 ## Prerequisites
 
-- `pi` built or runnable via `tsx`
+- `pi-acp` installed (or runnable via `tsx` in the repo)
 - A configured model provider (for example `ANTHROPIC_API_KEY` or `ANTHROPIC_OAUTH_TOKEN`)
 
-## Starting ACP Mode
+## Starting the Server
 
 ```bash
-pi --acp --cwd /path/to/project --provider anthropic --model claude-sonnet-4-5
+pi-acp --cwd /path/to/project --provider anthropic --model claude-sonnet-4-5
 ```
 
 Notes:
 - ACP mode is headless and communicates only via stdin/stdout.
 - Any non-ACP output is redirected to stderr.
 - `--cwd` must be an absolute path.
+- The server uses the same session directory as pi (`~/.pi/agent/sessions/acp`).
 
 ## Protocol Overview
 
@@ -62,7 +63,7 @@ If the model is not available or does not have valid credentials, the request fa
 - `image` blocks with inline data are sent as image attachments.
 - `resource_link` and `resource` blocks are converted to text with a `Resource:` prefix.
 
-The prompt request fails if the session is already streaming.
+If a prompt arrives while the session is streaming, it is queued with ACP `streamingBehavior: "followUp"` and sent once the session becomes idle.
 
 ### Prompt Response
 
@@ -70,7 +71,8 @@ pi maps internal stop reasons to ACP `PromptResponse.stopReason`:
 - `stop` and `toolUse` → `end_turn`
 - `length` → `max_tokens`
 - `aborted` → `cancelled`
-- `error` → `refusal`
+
+If the model reports `stopReason: "error"`, pi returns an ACP error (`RequestError.internalError`) instead of a `PromptResponse`.
 
 ## Modes (Tool Access)
 
@@ -119,7 +121,6 @@ pi emits ACP session updates through `sessionUpdate` notifications. Key update t
 ## Limitations
 
 - ACP is stdio only; no HTTP transport is provided.
-- Prompting is single-flight per session. A second `prompt` while streaming returns `invalidParams`.
 - Resource blocks are flattened into text (no rich resource rendering).
 - `resource_link` blocks are represented as text with a `Resource:` prefix.
 - Tool locations are only reported for file-based tools with a `path` argument.
@@ -184,6 +185,6 @@ process.stderr.write("\nDone\n");
 
 ## Troubleshooting
 
-- **JSON parsing errors**: verify the server is running in ACP mode (`pi --acp`) and not interactive TUI mode.
+- **JSON parsing errors**: verify the server is running in ACP mode (`pi-acp`) and not interactive TUI mode.
 - **Model not found**: ensure the `provider/model` identifier exists and credentials are configured.
 - **Session not found**: use `unstable_listSessions` to confirm available session IDs.

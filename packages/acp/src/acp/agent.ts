@@ -40,8 +40,7 @@ import {
 } from "@agentclientprotocol/sdk";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { ImageContent, Model, TextContent } from "@mariozechner/pi-ai";
-import { APP_NAME, VERSION } from "../config.js";
-import type { AgentSessionEvent } from "../core/agent-session.js";
+import { type AgentSessionEvent, APP_NAME, VERSION } from "@mariozechner/pi-coding-agent";
 import type { ACPConfig, ACPModeId, ACPSessionManagerApi, ACPSessionState } from "./types.js";
 
 const STOP_REASON_MAP: Record<string, PromptResponse["stopReason"]> = {

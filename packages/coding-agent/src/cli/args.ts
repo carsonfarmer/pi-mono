@@ -34,7 +34,6 @@ export interface Args {
 	noSkills?: boolean;
 	skills?: string[];
 	listModels?: string | true;
-	acp?: boolean;
 	messages: string[];
 	fileArgs: string[];
 	/** Unknown flags (potentially extension flags) - map of flag name to value */
@@ -128,8 +127,6 @@ export function parseArgs(args: string[], extensionFlags?: Map<string, { type: "
 		} else if (arg === "--skills" && i + 1 < args.length) {
 			// Comma-separated glob patterns for skill filtering
 			result.skills = args[++i].split(",").map((s) => s.trim());
-		} else if (arg === "--acp") {
-			result.acp = true;
 		} else if (arg === "--list-models") {
 			// Check if next arg is a search pattern (not a flag or file arg)
 			if (i + 1 < args.length && !args[i + 1].startsWith("-") && !args[i + 1].startsWith("@")) {
@@ -190,7 +187,6 @@ ${chalk.bold("Options:")}
   --skills <patterns>            Comma-separated glob patterns to filter skills (e.g., git-*,docker)
   --export <file>                Export session file to HTML and exit
   --list-models [search]         List available models (with optional fuzzy search)
-  --acp                          Start ACP server (stdio)
   --help, -h                     Show this help
   --version, -v                  Show version number
 
@@ -199,9 +195,6 @@ Extensions can register additional flags (e.g., --plan from plan-mode extension)
 ${chalk.bold("Examples:")}
   # Interactive mode
   ${APP_NAME}
-
-  # ACP server (stdio)
-  ${APP_NAME} --acp
 
   # Interactive mode with initial prompt
   ${APP_NAME} "List all .ts files in src/"

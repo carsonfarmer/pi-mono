@@ -1,22 +1,27 @@
+#!/usr/bin/env node
+import { APP_NAME, runMigrations, VERSION } from "@mariozechner/pi-coding-agent";
 import chalk from "chalk";
-import { startAcpServer } from "../acp/server.js";
-import { APP_NAME } from "../config.js";
-import { runMigrations } from "../migrations.js";
+import { startAcpServer } from "./acp/server.js";
 
-export interface AcpArgs {
+const CLI_NAME = `${APP_NAME}-acp`;
+
+interface AcpArgs {
 	cwd?: string;
 	provider?: string;
 	model?: string;
 	help?: boolean;
+	version?: boolean;
 }
 
-export function parseAcpArgs(args: string[]): AcpArgs {
+function parseAcpArgs(args: string[]): AcpArgs {
 	const parsed: AcpArgs = {};
 
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
 		if (arg === "--help" || arg === "-h") {
 			parsed.help = true;
+		} else if (arg === "--version" || arg === "-v") {
+			parsed.version = true;
 		} else if (arg === "--cwd" && i + 1 < args.length) {
 			parsed.cwd = args[++i];
 		} else if (arg === "--provider" && i + 1 < args.length) {
@@ -29,16 +34,22 @@ export function parseAcpArgs(args: string[]): AcpArgs {
 	return parsed;
 }
 
-export function printAcpHelp(): void {
+function printHelp(): void {
 	console.log(
-		`${chalk.bold(APP_NAME)} --acp - Agent Client Protocol server\n\n${chalk.bold("Usage:")}\n  ${APP_NAME} --acp [options]\n\n${chalk.bold("Options:")}\n  --cwd <path>         Working directory for new sessions\n  --provider <name>    Default provider override\n  --model <id>         Default model override\n  --help, -h           Show this help\n\n${chalk.bold("Examples:")}\n  ${APP_NAME} --acp\n  ${APP_NAME} --acp --cwd /path/to/project\n  ${APP_NAME} --acp --provider anthropic --model claude-sonnet-4-5\n`,
+		`${chalk.bold(CLI_NAME)} - Agent Client Protocol server for ${APP_NAME}\n\n${chalk.bold("Usage:")}\n  ${CLI_NAME} [options]\n\n${chalk.bold("Options:")}\n  --cwd <path>         Working directory for new sessions\n  --provider <name>    Default provider override\n  --model <id>         Default model override\n  --help, -h           Show this help\n  --version, -v        Show version\n\n${chalk.bold("Examples:")}\n  ${CLI_NAME}\n  ${CLI_NAME} --cwd /path/to/project\n  ${CLI_NAME} --provider anthropic --model claude-sonnet-4-5\n`,
 	);
 }
 
-export async function runAcp(args: string[]): Promise<void> {
-	const parsed = parseAcpArgs(args);
+async function run(): Promise<void> {
+	const parsed = parseAcpArgs(process.argv.slice(2));
+
+	if (parsed.version) {
+		console.log(VERSION);
+		return;
+	}
+
 	if (parsed.help) {
-		printAcpHelp();
+		printHelp();
 		return;
 	}
 
@@ -58,3 +69,5 @@ export async function runAcp(args: string[]): Promise<void> {
 		console.warn = originalWarn;
 	}
 }
+
+run();

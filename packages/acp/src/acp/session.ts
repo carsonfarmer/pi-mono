@@ -1,9 +1,12 @@
 import { RequestError } from "@agentclientprotocol/sdk";
 import type { Model } from "@mariozechner/pi-ai";
-import { createEventBus } from "../core/event-bus.js";
-import { createAgentSession } from "../core/sdk.js";
-import { type SessionInfo, SessionManager } from "../core/session-manager.js";
-import { SettingsManager } from "../core/settings-manager.js";
+import {
+	createAgentSession,
+	createEventBus,
+	type SessionInfo,
+	SessionManager,
+	SettingsManager,
+} from "@mariozechner/pi-coding-agent";
 import type { ACPConfig, ACPModeId, ACPSessionState } from "./types.js";
 
 const DEFAULT_MODE_ID: ACPModeId = "code";

@@ -2,10 +2,6 @@
 
 ## [Unreleased]
 
-### Added
-
-- Added ACP server support with `pi acp`, backed by AgentSession and session persistence.
-
 ## [0.48.0] - 2026-01-16
 
 ### Added
